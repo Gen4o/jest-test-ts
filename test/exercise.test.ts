@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-var value = (Math.random() + 1).toString(36).substring(7)
-var key = (Math.random() + 1).toString(36).substring(7)
+var value = randomName()
+var key = randomName()
 
 const data = {
   "main_key": key,
@@ -11,31 +11,31 @@ const url = 'https://l761dniu80.execute-api.us-east-2.amazonaws.com/default/exer
 const configPut = {
   method: 'put',
   url: url,
-  headers: { 
+  headers: {
     'Content-Type': 'application/json'
   },
-  data : data
+  data: data
 }
 
-describe('Client can', ()=>{
-   test('GET list of all the values in the store', async ()=>{
-       const response = await axios.get(url)
-       expect(response.status).toBe(200)
+describe('Client can', () => {
+  test('GET list of all the values in the store', async () => {
+    const response = await axios.get(url)
+    expect(response.status).toBe(200)
   })
 })
 
 
-describe('Client can', ()=>{
+describe('Client can', () => {
   test('Put value in to the store', async () => {
 
     const sizeBefore = await axios.get(url)
-    .then(response => response.data.length)
+      .then(response => response.data.length)
 
 
     const res = await axios(configPut)
 
     const sizeAfter = await axios.get(url)
-    .then(response => response.data.length)
+      .then(response => response.data.length)
 
     expect(res.status).toBe(200)
     expect(res.data).toEqual(data)
@@ -44,43 +44,43 @@ describe('Client can', ()=>{
 })
 
 
-describe('Client can', ()=>{
+describe('Client can', () => {
   test('Delete value from the store', async () => {
     const response = await axios.get(url)
 
     const sizeBefore = response.data.length
 
-    const main_key =   response.data[0].main_key
+    const main_key = response.data[0].main_key
 
-    const deleteData = {"main_key": main_key}
+    const deleteData = { "main_key": main_key }
 
     const configDelete = {
       method: 'delete',
       url: url,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
-      data : deleteData
+      data: deleteData
     }
-    
+
     const res = await axios(configDelete)
 
     const sizeAfter = await axios.get(url)
-    .then(response => {return response.data.length})
+      .then(response => { return response.data.length })
 
-    
+
     expect(res.status).toBe(200)
     expect(res.data).toEqual(deleteData)
     expect(sizeAfter).toBeLessThan(sizeBefore)
   })
 })
 
-describe('Client can', ()=>{
+describe('Client can', () => {
   test('Update value for existed key in to the store with POST', async () => {
 
     const main_key = await axios.get(url).then(response => response.data[0].main_key)
-    var value = (Math.random() + 1).toString(36).substring(7)
-    
+    var value = randomName()
+
     const dataPost = {
       "main_key": main_key,
       "value": value
@@ -89,10 +89,10 @@ describe('Client can', ()=>{
     const configPost = {
       method: 'post',
       url: url,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
-      data : dataPost
+      data: dataPost
     }
 
 
@@ -103,12 +103,12 @@ describe('Client can', ()=>{
   })
 })
 
-describe('Client can not', ()=>{
+describe('Client can not', () => {
   test('Update key in to the store with POST action', async () => {
 
     const value = await axios.get(url).then(response => response.data[0].value)
-    var main_key = (Math.random() + 1).toString(36).substring(7)
-    
+    var main_key = randomName()
+
     const dataPost = {
       "main_key": main_key,
       "value": value
@@ -117,39 +117,39 @@ describe('Client can not', ()=>{
     const configPost = {
       method: 'post',
       url: url,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
-      data : dataPost
+      data: dataPost
     }
 
-    const res = await axios(configPost).catch( error => error.response)
+    const res = await axios(configPost).catch(error => error.response)
 
     expect(res.status).toBe(400)
     expect(res.data).toEqual('value dose not exist')
   })
 })
 
-describe('Client can not', ()=>{
+describe('Client can not', () => {
   test('Put existed value to the store', async () => {
 
     const value = await axios.get(url).then(response => response.data[0].value)
     const main_key = await axios.get(url).then(response => response.data[0].main_key)
-    
+
     const data = {
       "main_key": main_key,
       "value": value
     }
-  
+
     const configPut = {
       method: 'put',
       url: url,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
-      data : data
+      data: data
     }
-    
+
     const res = await axios(configPut).catch(error => error.response)
 
     expect(res.status).toBe(400)
@@ -158,5 +158,7 @@ describe('Client can not', ()=>{
 })
 
 
-
+function randomName() {
+  return (Math.random() + 1).toString(36).substring(7)
+}
 
